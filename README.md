@@ -84,19 +84,9 @@ Output:
 Now, open `message_dec.txt` and you will see the original content:
 ```
 This is a confidential message for testing AES encryption.
-The quick brown fox jumps over the lazy dog.
+Bright minds work hard, pray sincerely, and live with gratitude.
 End of message.
 ```
-
----
-
-## 📸 Demo (Screenshots)
-
-**1. Terminal Output**  
-![Terminal Output](screenshots/output-terminal.png)
-
-**2. File Content Comparison**  
-![File Output](screenshots/output-file.png)
 
 ---
 
