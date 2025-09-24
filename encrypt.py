@@ -1,31 +1,36 @@
 import os
 import sys
-from cryptography.hazmat.primitives import padding
+from getpass import getpass
+from cryptography.hazmat.primitives import padding, hashes
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.backends import default_backend
 
-def generate_key(key_file):
-    """Generate a random AES key and save to file if not exists"""
-    if not os.path.exists(key_file):
-        key = os.urandom(32)  # AES-256
-        with open(key_file, "wb") as f:
-            f.write(key)
-        print(f"[+] New AES key generated and saved to {key_file}")
-    else:
-        with open(key_file, "rb") as f:
-            key = f.read()
-        print(f"[+] Using existing key from {key_file}")
-    return key
+def derive_key(password, salt):
+    """Derive AES key from password using PBKDF2"""
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,  # AES-256
+        salt=salt,
+        iterations=100000,
+        backend=default_backend()
+    )
+    return kdf.derive(password.encode())
 
-def encrypt_file(input_file, output_file, key_file):
-    key = generate_key(key_file)
-    iv = os.urandom(16)  # 16 bytes for AES block size
+def encrypt_file(input_file, output_file):
+    # Ask for password
+    password = getpass("Enter password for encryption: ")
+
+    # Generate random salt and derive key
+    salt = os.urandom(16)
+    key = derive_key(password, salt)
+    iv = os.urandom(16)
 
     # Read plaintext
     with open(input_file, "rb") as f:
         plaintext = f.read()
 
-    # Padding (PKCS7)
+    # Padding
     padder = padding.PKCS7(128).padder()
     padded_data = padder.update(plaintext) + padder.finalize()
 
@@ -34,15 +39,15 @@ def encrypt_file(input_file, output_file, key_file):
     encryptor = cipher.encryptor()
     ciphertext = encryptor.update(padded_data) + encryptor.finalize()
 
-    # Save IV + ciphertext
+    # Save: salt + IV + ciphertext
     with open(output_file, "wb") as f:
-        f.write(iv + ciphertext)
+        f.write(salt + iv + ciphertext)
 
     print(f"[+] File encrypted and saved to {output_file}")
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
-        print("Usage: python encrypt.py <input_file> <output_file> <key_file>")
+    if len(sys.argv) != 3:
+        print("Usage: python encrypt.py <input_file> <output_file>")
         sys.exit(1)
 
-    encrypt_file(sys.argv[1], sys.argv[2], sys.argv[3])
+    encrypt_file(sys.argv[1], sys.argv[2])
