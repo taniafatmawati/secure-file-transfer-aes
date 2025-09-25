@@ -1,0 +1,3 @@
+This is a confidential message for testing AES encryption.
+The quick brown fox jumps over the lazy dog.
+End of message.
