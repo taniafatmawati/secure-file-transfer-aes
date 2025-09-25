@@ -100,7 +100,8 @@ End of message.
 2. Salt loaded → PBKDF2 → derive same AES key
 3. AES-CBC decryption → Original file restored
 
-📸 Example Demo Screenshot (terminal + output file):
+
+📸 **Example Demo Screenshot** (terminal + output file):
 
 **1. Terminal Output**  
 ![Terminal Output](screenshots/output-terminal.png)
